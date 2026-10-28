@@ -84,6 +84,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
@@ -115,7 +119,11 @@ private data class DynamicIslandPlaybackState(
   val durationMs: Long,
 )
 
-class DynamicIslandOverlayService : Service() {
+class DynamicIslandOverlayService : Service(), LifecycleOwner {
+  private val lifecycleRegistry = LifecycleRegistry(this)
+  override val lifecycle: Lifecycle
+    get() = lifecycleRegistry
+
   private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
   private val playbackState = mutableStateOf<DynamicIslandPlaybackState?>(null)
   private val collapseSignal = mutableIntStateOf(0)
@@ -155,6 +163,8 @@ class DynamicIslandOverlayService : Service() {
 
   override fun onCreate() {
     super.onCreate()
+    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
     windowManager = getSystemService(WindowManager::class.java)
     startForegroundOverlayNotification()
     ContextCompat.registerReceiver(
@@ -208,6 +218,8 @@ class DynamicIslandOverlayService : Service() {
     controllerFuture?.cancel(true)
     controller?.release()
     controller = null
+    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     removeOverlay()
     scope.coroutineContext[Job]?.cancel()
     super.onDestroy()
@@ -310,6 +322,7 @@ class DynamicIslandOverlayService : Service() {
       overlayView
         ?: ComposeView(this).also { composeView ->
           overlayView = composeView
+          composeView.setViewTreeLifecycleOwner(this)
           composeView.setViewCompositionStrategy(
             ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool
           )

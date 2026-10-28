@@ -33,8 +33,8 @@ android {
     applicationId = "echo.music.iad1tya"
     minSdk = 26
     targetSdk = 36
-    versionCode = 165
-    versionName = "1.4.4"
+    versionCode = 166
+    versionName = "1.4.5"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables.useSupportLibrary = true
@@ -275,6 +275,7 @@ dependencies {
   implementation(libs.viewmodel)
   implementation(libs.viewmodel.compose)
   implementation(libs.lifecycle.process)
+  implementation(libs.lifecycle.runtime)
 
   implementation(libs.material3)
   implementation(libs.androidx.adaptive)
