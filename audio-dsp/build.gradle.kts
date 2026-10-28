@@ -25,7 +25,7 @@ dependencies {
   api(project(":dsp-core"))
   api(libs.media3)
   implementation(libs.timber)
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0")
 
   implementation(libs.hilt)
   ksp(libs.hilt.compiler)
