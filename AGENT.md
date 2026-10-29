@@ -370,21 +370,11 @@ Optional full-screen vertical swipe discovery (`echo.music.iad1tya.musicflow`, r
 
 Ambient Mode keeps the existing album-art square and layers muted Canvas artwork inside that same clipped square. The normal album art remains underneath as the fallback; Canvas follows playback state and is non-interactive.
 
-## Dynamic Island Overlay
+## Playback Controls
 
-The optional Dynamic Island overlay is a separate `DynamicIslandOverlayService`
-that connects to the existing `MusicService` MediaSession through a
-`MediaController`; it must never create or own a second audio player. Its
-default-off preference is `DynamicIslandEnabledKey` in the shared DataStore.
-The Settings toggle requests `SYSTEM_ALERT_WINDOW` through Android's
-"Display over other apps" settings. The service only attaches the overlay while
-the connected session has an active media item and the permission is available;
-pause keeps the island available for resuming, while stop/end removes it.
-
-The overlay is a window-sized-to-content ComposeView (`TYPE_APPLICATION_OVERLAY`)
-with a solid black background, rounded pill geometry, and white media controls.
-Use spring size transitions, keep the compact layout free of title text, and
-keep expanded metadata and playback actions inside the same pill. Position it
-from display-cutout insets when available; fall back to the top-center status-bar
-inset, and hide it in landscape. The window must remain limited to the pill so
-outside touches pass through to the app underneath.
+Playback controls use the existing Media3 `MediaSessionService` and its
+notification provider. Do not add a floating playback overlay, request
+"Display over other apps" access, or create a second playback service/player for
+media controls. Android and device manufacturers present media-session controls
+in the system notification shade, lock screen, and other supported system
+surfaces.

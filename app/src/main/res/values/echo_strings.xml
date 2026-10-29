@@ -1,16 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="dynamic_island">Dynamic Island</string>
-    <string name="dynamic_island_description">Show playback controls over other apps. Requires Display over other apps permission.</string>
-    <string name="dynamic_island_notification">Dynamic Island overlay is active</string>
-    <string name="dynamic_island_permission_unavailable">Could not open overlay permission settings</string>
-    <string name="dynamic_island_playback">Playback controls</string>
-    <string name="dynamic_island_previous">Previous track</string>
-    <string name="dynamic_island_next">Next track</string>
-    <string name="dynamic_island_play">Play</string>
-    <string name="dynamic_island_pause">Pause</string>
-    <string name="dynamic_island_unknown_title">Now playing</string>
-    <string name="dynamic_island_unknown_artist">Unknown artist</string>
     <string name="explore">Explore</string>
     <string name="tab_explore">Explore</string>
     <string name="tab_Suggestions">Suggestions</string>

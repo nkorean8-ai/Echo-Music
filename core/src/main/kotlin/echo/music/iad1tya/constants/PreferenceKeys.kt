@@ -338,7 +338,6 @@ val MusicFlowAnimatedBackgroundKey = booleanPreferencesKey("music_flow_animated_
 val MusicFlowLyricsKey = booleanPreferencesKey("music_flow_lyrics")
 val MusicFlowCellularPrefetchKey = booleanPreferencesKey("music_flow_cellular_prefetch")
 val MusicFlowHideRecentKey = booleanPreferencesKey("music_flow_hide_recent")
-val DynamicIslandEnabledKey = booleanPreferencesKey("dynamic_island_enabled")
 val PreferExtensionAudioKey = booleanPreferencesKey("prefer_extension_audio")
 
 enum class LibraryViewType {

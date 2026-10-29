@@ -22,7 +22,6 @@ import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -35,22 +34,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import echo.music.iad1tya.LocalPlayerAwareWindowInsets
 import echo.music.iad1tya.R
-import echo.music.iad1tya.constants.DynamicIslandEnabledKey
 import echo.music.iad1tya.echomusic.updater.getUpdateAvailableState
-import echo.music.iad1tya.playback.DynamicIslandOverlayService
 import echo.music.iad1tya.ui.component.IconButton
 import echo.music.iad1tya.ui.component.Material3SettingsGroup
 import echo.music.iad1tya.ui.component.Material3SettingsItem
 import echo.music.iad1tya.ui.screens.Screens
 import echo.music.iad1tya.ui.utils.backToMain
-import echo.music.iad1tya.utils.rememberPreference
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,10 +53,7 @@ fun SettingsScreen(
 ) {
   val uriHandler = LocalUriHandler.current
   val context = LocalContext.current
-  val lifecycleOwner = LocalLifecycleOwner.current
   val isAndroid12OrLater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-  val (dynamicIslandEnabled, setDynamicIslandEnabled) =
-    rememberPreference(DynamicIslandEnabledKey, defaultValue = false)
   val isUpdateAvailable =
     getUpdateAvailableState(context) &&
       echo.music.iad1tya.echomusic.updater.getAutoUpdateCheckSetting(context)
@@ -95,45 +84,6 @@ fun SettingsScreen(
   val backupDesc = stringResource(R.string.setting_desc_backup)
   val systemUpdateDesc = stringResource(R.string.setting_desc_update)
   val aboutDesc = stringResource(R.string.setting_desc_about)
-
-  DisposableEffect(lifecycleOwner, dynamicIslandEnabled) {
-    fun syncDynamicIslandService() {
-      if (dynamicIslandEnabled && Settings.canDrawOverlays(context)) {
-        ContextCompat.startForegroundService(
-          context,
-          Intent(context, DynamicIslandOverlayService::class.java),
-        )
-      } else if (!dynamicIslandEnabled) {
-        context.stopService(Intent(context, DynamicIslandOverlayService::class.java))
-      }
-    }
-
-    val observer =
-      LifecycleEventObserver { _, event ->
-        if (event == Lifecycle.Event.ON_RESUME) syncDynamicIslandService()
-      }
-    lifecycleOwner.lifecycle.addObserver(observer)
-    syncDynamicIslandService()
-    onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-  }
-
-  fun setDynamicIsland(enabled: Boolean) {
-    setDynamicIslandEnabled(enabled)
-    if (!enabled || Settings.canDrawOverlays(context)) return
-
-    try {
-      context.startActivity(
-        Intent(
-          Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-          Uri.parse("package:${context.packageName}"),
-        )
-      )
-    } catch (error: ActivityNotFoundException) {
-      Toast.makeText(context, R.string.dynamic_island_permission_unavailable, Toast.LENGTH_LONG).show()
-    } catch (error: SecurityException) {
-      Toast.makeText(context, R.string.dynamic_island_permission_unavailable, Toast.LENGTH_LONG).show()
-    }
-  }
 
   val scrollState = rememberScrollState()
   Column(
@@ -284,28 +234,6 @@ fun SettingsScreen(
             title = { Text(musicFlowText) },
             description = { Text(musicFlowDesc) },
             onClick = { navController.navigate("settings/music_flow") }
-          )
-        )
-      }
-      val dynamicIslandText = stringResource(R.string.dynamic_island)
-      val dynamicIslandDesc = stringResource(R.string.dynamic_island_description)
-      if (
-        dynamicIslandText.lowercase().contains(searchLower) ||
-          dynamicIslandDesc.lowercase().contains(searchLower)
-      ) {
-        add(
-          Material3SettingsItem(
-            isHighlighted = (highlightKey == dynamicIslandText),
-            icon = painterResource(R.drawable.graphic_eq),
-            title = { Text(dynamicIslandText) },
-            description = { Text(dynamicIslandDesc) },
-            trailingContent = {
-              Switch(
-                checked = dynamicIslandEnabled,
-                onCheckedChange = ::setDynamicIsland,
-              )
-            },
-            onClick = { setDynamicIsland(!dynamicIslandEnabled) },
           )
         )
       }
@@ -512,9 +440,9 @@ fun SettingsScreen(
       // Let's just create groups manually using itemsList which preserves order
       val accountGroup = itemsList.take(2) // Account, AI
       val listeningSummaryGroup = itemsList.drop(2).take(1) // Listening Summary
-      val playerGroup = itemsList.drop(3).take(5) // Appearance, Player, Music Flow, Dynamic Island, Listen Together
-      val dataGroup = itemsList.drop(8).take(4) // Content, Privacy, Storage, Backup
-      val systemGroup = itemsList.drop(12) // Update, Links, About
+      val playerGroup = itemsList.drop(3).take(4) // Appearance, Player, Music Flow, Listen Together
+      val dataGroup = itemsList.drop(7).take(4) // Content, Privacy, Storage, Backup
+      val systemGroup = itemsList.drop(11) // Update, Links, About
 
       if (accountGroup.isNotEmpty()) {
         Material3SettingsGroup(scrollState = scrollState, items = accountGroup)

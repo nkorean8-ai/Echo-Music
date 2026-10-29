@@ -261,7 +261,6 @@ val EmphasizedEasing = CubicBezierEasing(0.2f, 0.0f, 0.0f, 1.0f)
 @Suppress("DEPRECATION", "ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-  private var openDynamicIslandPlayer by mutableStateOf(false)
   companion object {
     const val ACTION_SEARCH = "echo.music.iad1tya.action.SEARCH"
     const val ACTION_LIBRARY = "echo.music.iad1tya.action.LIBRARY"
@@ -363,9 +362,6 @@ class MainActivity : ComponentActivity() {
   override fun onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
     setIntent(intent)
-    if (intent.action == "echo.music.iad1tya.action.OPEN_DYNAMIC_ISLAND_PLAYER") {
-      openDynamicIslandPlayer = true
-    }
     if (::navController.isInitialized) {
       handleDeepLinkIntent(intent, navController)
       handleRecognitionIntent(intent, navController)
@@ -398,9 +394,6 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     installSplashScreen()
     super.onCreate(savedInstanceState)
-    openDynamicIslandPlayer =
-      intent?.action == "echo.music.iad1tya.action.OPEN_DYNAMIC_ISLAND_PLAYER"
-
     try {
       startService(Intent(this, echo.music.iad1tya.playback.MusicService::class.java))
     } catch (e: Exception) {
@@ -1266,12 +1259,6 @@ class MainActivity : ComponentActivity() {
           }
 
         val expandPlayer = remember(playerBottomSheetState) { { playerBottomSheetState.expandSoft() } }
-        LaunchedEffect(openDynamicIslandPlayer) {
-          if (openDynamicIslandPlayer) {
-            expandPlayer()
-            openDynamicIslandPlayer = false
-          }
-        }
         CompositionLocalProvider(
           LocalHapticFeedback provides customHapticFeedback,
           LocalGlassEffectConfig provides glassEffectConfig,

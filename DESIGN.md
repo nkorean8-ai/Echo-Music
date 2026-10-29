@@ -104,22 +104,9 @@ Vertical swipe discovery, laid out like a Resso-style "For You" page (interactio
 
 Ambient Mode may layer muted Canvas video artwork inside the existing album-art square. Keep the original square size, rounded clipping, and interaction surface unchanged; Canvas is a non-interactive visual layer above the normal album art and follows playback state. The existing glow background remains separate underneath the screen.
 
-## Dynamic Island Playback Overlay
+## System Playback Controls
 
-The optional playback overlay is a platform-specific, always-dark exception to
-the app's translucent surfaces: it uses a pure `#000000` background with no
-border, shadow, gradient, or alpha. Keep the compact pill about 176dp by 38dp,
-with 24dp artwork and a small white waveform; do not show track text until the
-expanded state. The expanded pill is at most 360dp by 80dp, fully rounded, and
-contains artwork, one-line title and artist, a thin progress line, and previous,
-play/pause, and next controls. Use the app typography and white icons.
-
-Animate the pill's dimensions and swipe stretch with medium-bounce Compose
-springs; fade the compact and expanded content as the shape changes. Swipe
-right/left advances or goes back, double tap toggles playback, single tap opens
-the existing player, and long press toggles expansion. Expansion expires after
-four seconds without interaction. Haptic feedback is limited to swipe feedback.
-The overlay must stay sized to its content, centered from actual display-cutout
-bounds when possible, and hidden in landscape; without cutout bounds, use
-top-center below the status bar. It is driven only by the existing MediaSession
-and remains available while paused so the user can resume; stop/end removes it.
+Use the existing Media3 media session and notification provider for playback
+controls. Let Android render supported controls in system surfaces such as the
+notification shade and lock screen. Do not draw a floating pill over other apps
+or request "Display over other apps" permission for playback controls.
