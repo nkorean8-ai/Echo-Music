@@ -129,6 +129,7 @@ class DynamicIslandOverlayService : Service(), LifecycleOwner {
   private val collapseSignal = mutableIntStateOf(0)
   private lateinit var windowManager: WindowManager
   private var overlayView: ComposeView? = null
+  private var overlayAdded = false
   private var controller: MediaController? = null
   private var controllerFuture: ListenableFuture<MediaController>? = null
   private var positionJob: Job? = null
@@ -366,7 +367,10 @@ class DynamicIslandOverlayService : Service(), LifecycleOwner {
             false
           }
         }
-    if (view.isAttachedToWindow) return
+    if (overlayAdded || view.isAttachedToWindow) {
+      overlayAdded = true
+      return
+    }
     val params =
       WindowManager.LayoutParams(
         WindowManager.LayoutParams.WRAP_CONTENT,
@@ -385,11 +389,22 @@ class DynamicIslandOverlayService : Service(), LifecycleOwner {
         windowAnimations = 0
       }
     try {
+      overlayAdded = true
       windowManager.addView(view, params)
+    } catch (error: IllegalStateException) {
+      if (error.message?.contains("already been added to the window manager") == true) {
+        overlayAdded = true
+        Log.w(TAG, "Overlay view was already registered with WindowManager", error)
+      } else {
+        overlayAdded = false
+        throw error
+      }
     } catch (error: WindowManager.BadTokenException) {
+      overlayAdded = false
       Log.e(TAG, "Overlay window could not be attached", error)
       stopSelf()
     } catch (error: SecurityException) {
+      overlayAdded = false
       Log.e(TAG, "Overlay permission was revoked before the window was attached", error)
       stopSelf()
     }
@@ -420,9 +435,11 @@ class DynamicIslandOverlayService : Service(), LifecycleOwner {
     val view = overlayView ?: return
     overlayView = null
     try {
-      if (view.isAttachedToWindow) windowManager.removeView(view)
+      if (overlayAdded || view.isAttachedToWindow) windowManager.removeViewImmediate(view)
     } catch (error: IllegalArgumentException) {
       Log.w(TAG, "Overlay window was already removed", error)
+    } finally {
+      overlayAdded = false
     }
   }
 
